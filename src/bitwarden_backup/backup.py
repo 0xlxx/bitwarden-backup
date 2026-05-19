@@ -90,8 +90,8 @@ def run_backup() -> Path:
     try:
         logger.info("Unlocking vault...")
         unlock_key = _run(
-            ["unlock", "--passwordenv", "BW_MASTER_PW", "--raw"],
-            env={**session_env, "BW_MASTER_PW": master_password},
+            ["unlock", master_password, "--raw"],
+            env=session_env,
         ).strip()
         session_env = {"BW_SESSION": unlock_key}
 
