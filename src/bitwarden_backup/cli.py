@@ -91,12 +91,16 @@ def setup() -> None:
 
     # Retention
     retention = click.prompt("  Keep backups for how many days?", type=int, default=7)
+
+    # Schedule time
+    schedule_time = click.prompt("  Daily backup time", default="02:00")
     click.echo()
 
     # Save everything
     save_config({
         "output_dir": str(Path("~/.local/share/bitwarden-backup").expanduser()),
         "retention_days": retention,
+        "backup_time": schedule_time,
     })
     save_api_credentials(client_id, client_secret)
     save_master_password(master_pwd)
@@ -106,8 +110,8 @@ def setup() -> None:
 
     # Install schedule
     try:
-        install_schedule()
-        click.secho("  Schedule installed (daily at 02:00)", fg="green")
+        install_schedule(time_str=schedule_time)
+        click.secho(f"  Schedule installed (daily at {schedule_time})", fg="green")
     except Exception as e:
         click.secho(f"  Warning: failed to install schedule: {e}", fg="yellow")
 

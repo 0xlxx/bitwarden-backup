@@ -9,6 +9,7 @@ import yaml
 DEFAULT_CONFIG: dict[str, Any] = {
     "output_dir": "~/.local/share/bitwarden-backup",
     "retention_days": 7,
+    "backup_time": "02:00",
 }
 
 

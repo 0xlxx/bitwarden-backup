@@ -13,21 +13,28 @@ LAUNCHD_LABEL = "com.bitwarden-backup"
 LAUNCHD_PLIST = Path(f"~/Library/LaunchAgents/{LAUNCHD_LABEL}.plist").expanduser()
 
 CRON_MARKER = "# bitwarden-backup"
-CRON_JOB = "0 2 * * * {python} -m bitwarden_backup run"
+def _cron_job(hour: int, minute: int) -> str:
+    return f"{minute} {hour} * * * {{python}} -m bitwarden_backup run"
 
 
 def _python_path() -> str:
     return sys.executable
 
 
-def install() -> None:
+def install(time_str: str = "02:00") -> None:
+    hour, minute = _parse_time(time_str)
     system = platform.system()
     if system == "Darwin":
-        _install_launchd()
+        _install_launchd(hour, minute)
     elif system == "Linux":
-        _install_cron()
+        _install_cron(hour, minute)
     else:
         raise RuntimeError(f"Unsupported platform: {system}")
+
+
+def _parse_time(time_str: str) -> tuple[int, int]:
+    parts = time_str.strip().split(":")
+    return int(parts[0]), int(parts[1])
 
 
 def uninstall() -> None:
@@ -47,7 +54,7 @@ def status() -> dict:
     return {"platform": system, "installed": False}
 
 
-def _install_launchd() -> None:
+def _install_launchd(hour: int = 2, minute: int = 0) -> None:
     python = _python_path()
     plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -66,9 +73,9 @@ def _install_launchd() -> None:
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
-        <integer>2</integer>
+        <integer>{hour}</integer>
         <key>Minute</key>
-        <integer>0</integer>
+        <integer>{minute}</integer>
     </dict>
     <key>StandardOutPath</key>
     <string>{Path('~/.local/share/bitwarden-backup/backup.log').expanduser()}</string>
@@ -108,9 +115,9 @@ def _status_launchd() -> dict:
     return {"platform": "Darwin", "installed": installed, "running": running}
 
 
-def _install_cron() -> None:
+def _install_cron(hour: int = 2, minute: int = 0) -> None:
     python = _python_path()
-    job_line = f"{CRON_JOB.format(python=python)} {CRON_MARKER}"
+    job_line = f"{_cron_job(hour, minute).format(python=python)} {CRON_MARKER}"
 
     try:
         existing = subprocess.run(
