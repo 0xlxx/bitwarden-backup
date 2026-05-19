@@ -11,9 +11,10 @@ class BitwardenBackup < Formula
   depends_on "python@3.12"
 
   def install
-    virtualenv_create(libexec, "python3.12")
-    system libexec/"bin/pip", "install", buildpath
-    bin.install_symlink libexec/"bin/bw-backup"
+    venv = libexec
+    system Formula["python@3.12"].opt_bin/"python3.12", "-m", "venv", "--upgrade-deps", venv
+    system venv/"bin/pip", "install", buildpath
+    bin.install_symlink venv/"bin/bw-backup"
   end
 
   test do
