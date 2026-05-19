@@ -3,8 +3,8 @@ class BitwardenBackup < Formula
 
   desc "Automated daily encrypted backups for Bitwarden vault"
   homepage "https://github.com/0xlxx/bitwarden-backup"
-  url "https://github.com/0xlxx/bitwarden-backup/archive/refs/tags/v0.1.7.tar.gz"
-  sha256 "167363348446dd5eb3dbbd98449aed9bedbc263f9491b25eb1eacde842557192"
+  url "https://github.com/0xlxx/bitwarden-backup/archive/refs/tags/v0.1.8.tar.gz"
+  sha256 "347f8421272de4cfe456eb034f2e198a0481c8125bed436dc23ae8d66c9d8fd4"
   license "MIT"
 
   depends_on "bitwarden-cli"
