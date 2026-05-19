@@ -91,6 +91,10 @@ def run_backup() -> Path:
 
     session_env = {"BW_SESSION": session_key}
 
+    # Diagnostic: check vault state after login
+    _status = _run(["status"], env=session_env)
+    logger.info(f"Status after login: {_status.strip()}")
+
     master_password = get_master_password()
     if not master_password:
         raise BackupError(
@@ -111,7 +115,13 @@ def run_backup() -> Path:
             ).strip()
         finally:
             os.unlink(pw_file)
+        logger.info(f"Unlock key (first 12 chars): {unlock_key[:12]}... "
+                    f"(same as login key: {unlock_key == session_key})")
         session_env = {"BW_SESSION": unlock_key}
+
+        # Diagnostic: check vault state after unlock
+        _status = _run(["status"], env=session_env)
+        logger.info(f"Status after unlock: {_status.strip()}")
 
         logger.info("Syncing vault...")
         _run(["sync"], env=session_env, timeout=60)

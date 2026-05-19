@@ -1,6 +1,6 @@
 [project]
 name = "bitwarden-backup"
-version = "0.1.8"
+version = "0.1.9"
 description = "Automated encrypted backups for Bitwarden vault"
 requires-python = ">=3.10"
 license = { text = "MIT" }
