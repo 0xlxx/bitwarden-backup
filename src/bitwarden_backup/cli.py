@@ -76,14 +76,17 @@ def setup() -> None:
         click.secho("  Passwords don't match, try again.", fg="red")
     click.echo()
 
-    # Backup encryption password
-    click.echo("  Backup encryption password (do NOT use your Bitwarden master password)")
-    while True:
-        pwd = click.prompt("  Password", hide_input=True)
-        confirm = click.prompt("  Confirm password", hide_input=True)
-        if pwd == confirm:
-            break
-        click.secho("  Passwords don't match, try again.", fg="red")
+    # Backup encryption password — default to master password
+    if click.confirm("  Use master password as backup encryption password?", default=True):
+        pwd = master_pwd
+    else:
+        click.echo("  Backup encryption password (do NOT use your Bitwarden master password)")
+        while True:
+            pwd = click.prompt("  Password", hide_input=True)
+            confirm = click.prompt("  Confirm password", hide_input=True)
+            if pwd == confirm:
+                break
+            click.secho("  Passwords don't match, try again.", fg="red")
     click.echo()
 
     # Retention
