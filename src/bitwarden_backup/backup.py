@@ -89,8 +89,11 @@ def run_backup() -> Path:
 
     try:
         logger.info("Unlocking vault...")
-        _run(["unlock", "--passwordenv", "BW_MASTER_PW", "--raw"],
-             env={**session_env, "BW_MASTER_PW": master_password})
+        unlock_key = _run(
+            ["unlock", "--passwordenv", "BW_MASTER_PW", "--raw"],
+            env={**session_env, "BW_MASTER_PW": master_password},
+        ).strip()
+        session_env = {"BW_SESSION": unlock_key}
 
         logger.info("Syncing vault...")
         _run(["sync"], env=session_env, timeout=60)
@@ -117,7 +120,8 @@ def run_backup() -> Path:
         return filepath
     finally:
         logger.info("Logging out...")
-        try:
-            _run(["logout"], env=session_env, timeout=10)
-        except BackupError:
-            pass  # best-effort logout
+        for env in (session_env, {"BW_SESSION": session_key}):
+            try:
+                _run(["logout"], env=env, timeout=10)
+            except BackupError:
+                pass
