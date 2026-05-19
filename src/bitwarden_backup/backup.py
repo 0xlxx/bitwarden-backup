@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -95,11 +96,17 @@ def run_backup() -> Path:
 
     try:
         logger.info("Unlocking vault...")
-        unlock_key = _run(
-            ["unlock", "--raw"],
-            env=session_env,
-            stdin=master_password,
-        ).strip()
+        with tempfile.NamedTemporaryFile(mode="w", prefix="bw-pw-", delete=False) as pf:
+            pf.write(master_password + "\n")
+            pw_file = pf.name
+        try:
+            os.chmod(pw_file, 0o600)
+            unlock_key = _run(
+                ["unlock", "--passwordfile", pw_file, "--raw"],
+                env=session_env,
+            ).strip()
+        finally:
+            os.unlink(pw_file)
         session_env = {"BW_SESSION": unlock_key}
 
         logger.info("Syncing vault...")
