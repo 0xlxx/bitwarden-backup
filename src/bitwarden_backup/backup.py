@@ -30,10 +30,13 @@ def _run(
     env: dict[str, str] | None = None,
     timeout: int = 120,
     stdin: str | None = None,
+    no_interaction: bool = True,
 ) -> str:
     """Run a bw command, return stdout. Raises BackupError on failure."""
     cmd = [BW_PATH, *args]
-    merged_env = {**os.environ, "BW_NOINTERACTION": "true"}
+    merged_env = dict(os.environ)
+    if no_interaction:
+        merged_env["BW_NOINTERACTION"] = "true"
     if env:
         merged_env.update(env)
     try:
@@ -104,6 +107,7 @@ def run_backup() -> Path:
             unlock_key = _run(
                 ["unlock", "--passwordfile", pw_file, "--raw"],
                 env=session_env,
+                no_interaction=False,
             ).strip()
         finally:
             os.unlink(pw_file)
