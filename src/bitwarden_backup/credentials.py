@@ -41,6 +41,14 @@ def get_encrypt_password() -> str | None:
     return get_credential("encrypt_password")
 
 
+def save_master_password(password: str) -> None:
+    set_credential("master_password", password)
+
+
+def get_master_password() -> str | None:
+    return get_credential("master_password")
+
+
 def clear_all() -> None:
-    for name in ("client_id", "client_secret", "encrypt_password"):
+    for name in ("client_id", "client_secret", "encrypt_password", "master_password"):
         delete_credential(name)

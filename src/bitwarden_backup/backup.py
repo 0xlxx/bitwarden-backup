@@ -7,7 +7,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from bitwarden_backup.config import load_config, output_dir
-from bitwarden_backup.credentials import get_api_credentials, get_encrypt_password
+from bitwarden_backup.credentials import (
+    get_api_credentials,
+    get_encrypt_password,
+    get_master_password,
+)
 from bitwarden_backup.crypto import encrypt
 from bitwarden_backup.retention import cleanup
 
@@ -77,7 +81,17 @@ def run_backup() -> Path:
 
     session_env = {"BW_SESSION": session_key}
 
+    master_password = get_master_password()
+    if not master_password:
+        raise BackupError(
+            "Master password not found. Run 'bw-backup setup' first."
+        )
+
     try:
+        logger.info("Unlocking vault...")
+        _run(["unlock", "--passwordenv", "BW_MASTER_PW", "--raw"],
+             env={**session_env, "BW_MASTER_PW": master_password})
+
         logger.info("Syncing vault...")
         _run(["sync"], env=session_env, timeout=60)
 

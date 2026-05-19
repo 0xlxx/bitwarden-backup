@@ -18,6 +18,8 @@ def _make_subprocess_fn():
 
         if "login --apikey" in cmd:
             result.stdout = "test_session_key_abc123\n"
+        elif "unlock" in cmd:
+            result.stdout = "unlocked_session_key_xyz\n"
         elif "sync" in cmd:
             result.stdout = ""
         elif "export" in cmd:

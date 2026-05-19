@@ -12,6 +12,7 @@ from bitwarden_backup.config import load_config, save_config, output_dir
 from bitwarden_backup.credentials import (
     save_api_credentials,
     save_encrypt_password,
+    save_master_password,
     get_api_credentials,
     get_encrypt_password,
     clear_all,
@@ -65,6 +66,16 @@ def setup() -> None:
     client_secret = click.prompt("  Client Secret").strip()
     click.echo()
 
+    # Vault master password (needed to unlock vault for export)
+    click.echo("  Bitwarden master password (required to unlock vault)")
+    while True:
+        master_pwd = click.prompt("  Master password", hide_input=True)
+        confirm = click.prompt("  Confirm master password", hide_input=True)
+        if master_pwd == confirm:
+            break
+        click.secho("  Passwords don't match, try again.", fg="red")
+    click.echo()
+
     # Backup encryption password
     click.echo("  Backup encryption password (do NOT use your Bitwarden master password)")
     while True:
@@ -85,6 +96,7 @@ def setup() -> None:
         "retention_days": retention,
     })
     save_api_credentials(client_id, client_secret)
+    save_master_password(master_pwd)
     save_encrypt_password(pwd)
 
     click.secho("  Configuration saved", fg="green")

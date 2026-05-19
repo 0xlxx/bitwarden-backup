@@ -50,8 +50,13 @@ def mock_subprocess():
 @pytest.fixture
 def mock_credentials(mock_keyring):
     """Set up test credentials in mock keyring."""
-    from bitwarden_backup.credentials import save_api_credentials, save_encrypt_password
+    from bitwarden_backup.credentials import (
+        save_api_credentials,
+        save_encrypt_password,
+        save_master_password,
+    )
     save_api_credentials("test_client_id", "test_client_secret")
+    save_master_password("test-master-pw")
     save_encrypt_password("test-password-123")
     yield
     from bitwarden_backup.credentials import clear_all
