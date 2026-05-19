@@ -24,7 +24,12 @@ class BackupError(Exception):
     pass
 
 
-def _run(args: list[str], env: dict[str, str] | None = None, timeout: int = 120) -> str:
+def _run(
+    args: list[str],
+    env: dict[str, str] | None = None,
+    timeout: int = 120,
+    stdin: str | None = None,
+) -> str:
     """Run a bw command, return stdout. Raises BackupError on failure."""
     cmd = [BW_PATH, *args]
     merged_env = {**os.environ, "BW_NOINTERACTION": "true"}
@@ -35,6 +40,7 @@ def _run(args: list[str], env: dict[str, str] | None = None, timeout: int = 120)
             cmd,
             capture_output=True,
             text=True,
+            input=stdin,
             env=merged_env,
             timeout=timeout,
         )
@@ -90,8 +96,9 @@ def run_backup() -> Path:
     try:
         logger.info("Unlocking vault...")
         unlock_key = _run(
-            ["unlock", master_password, "--raw"],
+            ["unlock", "--raw"],
             env=session_env,
+            stdin=master_password,
         ).strip()
         session_env = {"BW_SESSION": unlock_key}
 
